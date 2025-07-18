@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "411868406027",
+    "project_id": "crow-trading-app",
+    "storage_bucket": "crow-trading-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411868406027:android:5daa80a1f19a0fcf70020e",
+        "android_client_info": {
+          "package_name": "com.deepakjetpackcompose.crowtradingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpNEqIoUDeHlkAcg5WeHNcFZdVl7PK2dE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

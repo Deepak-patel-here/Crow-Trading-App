@@ -9,4 +9,10 @@ sealed class NavigationHelper {
 
     @Serializable
     object LoginScreen: NavigationHelper()
+
+    @Serializable
+    object SignUpScreen: NavigationHelper()
+
+    @Serializable
+    object HomeScreen : NavigationHelper()
 }

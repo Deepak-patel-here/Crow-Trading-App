@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -39,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.domain.navigation.NavigationHelper
@@ -53,24 +55,30 @@ import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,viewModel: AuthViewModel= hiltViewModel<AuthViewModel>()) {
-
+fun SignUpScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
+) {
     val emailIn = remember { mutableStateOf("") }
     val passwordIn = remember { mutableStateOf("") }
+    val nameIn = remember { mutableStateOf("") }
+    val confirmPasswordIn = remember { mutableStateOf("") }
     val passwordFocus = remember { FocusRequester() }
-    val keyboard = LocalSoftwareKeyboardController.current
-    val authState=viewModel.authState.collectAsState()
-    val context= LocalContext.current
+    val emailFocus = remember { FocusRequester() }
+    val confirmPasswordFocus = remember { FocusRequester() }
+    val authState = viewModel.authState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(authState.value) {
-        if(authState.value== AuthState.Success){
-            navController.navigate(NavigationHelper.HomeScreen){
-                popUpTo(NavigationHelper.LoginScreen){inclusive =true}
+        if (authState.value == AuthState.Success) {
+            navController.navigate(NavigationHelper.HomeScreen) {
+                popUpTo(NavigationHelper.LoginScreen) { inclusive = true }
             }
         }
     }
 
-
+    val keyboard = LocalSoftwareKeyboardController.current
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -85,6 +93,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
                     radius = 1200f
                 )
             )
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
             .navigationBarsPadding()
             .statusBarsPadding()
@@ -93,7 +102,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
         val screenHeight = minHeight
         val screenWidth = minWidth
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (c1, c2, c3, c4, c5, c6, coin, email, password, loginBtn, otherText) = createRefs()
+            val (c1, c2, c3, c4, c5, c6, coin, email, password, name, cPassword, loginBtn, otherText) = createRefs()
 
             CustomCircleComponent(
                 size = 300f,
@@ -162,6 +171,20 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
             })
 
             AuthTextField(
+                input = nameIn.value,
+                onChange = { nameIn.value = it },
+                label = "Name",
+                trailingIcon = Icons.Default.Person,
+                isPassword = false,
+                imeAction = ImeAction.Next,
+                keyboardActions = KeyboardActions(onNext = { emailFocus.requestFocus() }),
+                modifier = Modifier.constrainAs(name) {
+                    top.linkTo(coin.bottom, margin = 20.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
+            AuthTextField(
                 input = emailIn.value,
                 onChange = { emailIn.value = it },
                 label = "Email",
@@ -169,11 +192,13 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
                 isPassword = false,
                 imeAction = ImeAction.Next,
                 keyboardActions = KeyboardActions(onNext = { passwordFocus.requestFocus() }),
-                modifier = Modifier.constrainAs(email) {
-                    top.linkTo(coin.bottom, margin = 20.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
+                modifier = Modifier
+                    .constrainAs(email) {
+                        top.linkTo(name.bottom, margin = 15.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .focusRequester(emailFocus)
             )
 
             AuthTextField(
@@ -183,9 +208,9 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
                 trailingIcon = Icons.Default.Lock,
                 isPassword = true,
                 show = R.drawable.show,
-                hide=R.drawable.hide,
-                imeAction = ImeAction.Done,
-                keyboardActions = KeyboardActions(onNext = { keyboard?.hide() }),
+                hide = R.drawable.hide,
+                imeAction = ImeAction.Next,
+                keyboardActions = KeyboardActions(onNext = { confirmPasswordFocus.requestFocus() }),
                 modifier = Modifier
                     .constrainAs(password) {
                         top.linkTo(email.bottom, margin = 15.dp)
@@ -195,34 +220,67 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
                     .focusRequester(passwordFocus)
             )
 
+            AuthTextField(
+                input = confirmPasswordIn.value,
+                onChange = { confirmPasswordIn.value = it },
+                label = "Re-enter passoword here",
+                trailingIcon = Icons.Default.Lock,
+                isPassword = true,
+                show = R.drawable.show,
+                hide = R.drawable.hide,
+                imeAction = ImeAction.Done,
+                keyboardActions = KeyboardActions(onNext = { keyboard?.hide() }),
+                modifier = Modifier
+                    .constrainAs(cPassword) {
+                        top.linkTo(password.bottom, margin = 15.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .focusRequester(confirmPasswordFocus)
+            )
+
             Button(
                 onClick = {
-                    if(emailIn.value.isNotBlank() && passwordIn.value.isNotBlank()){
-                        viewModel.login (email=emailIn.value,password=passwordIn.value){success,msg->
-                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    if (emailIn.value.isNotBlank() && passwordIn.value.isNotBlank() && passwordIn.value.isNotBlank() && confirmPasswordIn.value.isNotBlank()) {
+
+                        if(passwordIn.value!=confirmPasswordIn.value) Toast.makeText(
+                            context,
+                            "password not matches",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        else {
+                            viewModel.register(
+                                email = emailIn.value,
+                                password = passwordIn.value,
+                                name=nameIn.value
+                            ) { success, msg ->
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }else Toast.makeText(context, "Fill all the fields", Toast.LENGTH_SHORT).show()
+                    } else Toast.makeText(context, "Fill all the fiels", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .constrainAs(loginBtn) {
-                        top.linkTo(password.bottom, margin = 30.dp)
+                        top.linkTo(cPassword.bottom, margin = 30.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA532)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Login", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("SignUp", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
 
             AuthTextComponent(
-                text1 = "Don't have an account? ",
-                text2 = "Register",
-                onClick = { navController.navigate(NavigationHelper.SignUpScreen){
-                    popUpTo(NavigationHelper.LoginScreen){inclusive =true}
-                } },
+                text1 = "Already have an account? ",
+                text2 = "Login",
+                onClick = {
+                    navController.navigate(NavigationHelper.LoginScreen) {
+                        popUpTo(NavigationHelper.SignUpScreen) { inclusive = true }
+                    }
+                },
                 modifier = Modifier.constrainAs(otherText) {
                     top.linkTo(loginBtn.bottom, margin = 50.dp)
                     start.linkTo(parent.start)
@@ -232,7 +290,8 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
 
         }
     }
-    if (authState.value==AuthState.Loading) {
+
+    if (authState.value == AuthState.Loading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -242,6 +301,5 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
             CoinLoader(size = 250.dp)
         }
     }
-
 
 }
