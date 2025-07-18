@@ -40,7 +40,3 @@ val SpecialGothic= FontFamily(
 
 )
 
-val Sansation=FontFamily(
-    Font(R.font.sansation_bold, weight = FontWeight.Bold),
-    Font(R.font.sansation_regular, weight = FontWeight.Normal)
-)

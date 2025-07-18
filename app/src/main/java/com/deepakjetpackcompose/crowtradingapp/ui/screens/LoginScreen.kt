@@ -239,7 +239,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController,view
                 .background(Color.White.copy(alpha = 0.6f)), // semi-transparent overlay
             contentAlignment = Alignment.Center
         ) {
-            CoinLoader(size = 250.dp)
+            CoinLoader(size = 300.dp)
         }
     }
 

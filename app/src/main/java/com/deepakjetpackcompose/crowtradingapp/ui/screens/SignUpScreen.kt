@@ -298,7 +298,7 @@ fun SignUpScreen(
                 .background(Color.White.copy(alpha = 0.6f)), // semi-transparent overlay
             contentAlignment = Alignment.Center
         ) {
-            CoinLoader(size = 250.dp)
+            CoinLoader(size = 300.dp)
         }
     }
 

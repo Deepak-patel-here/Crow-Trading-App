@@ -24,12 +24,12 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
                     _authState.value= AuthState.Success
                 }
                 .addOnFailureListener {
-                    onResult(false,"Login Failed")
+                    onResult(false,it.localizedMessage.toString())
                     _authState.value= AuthState.Error(it.localizedMessage)
                 }
         }
         catch (e: Exception){
-            onResult(false,"Login Failed")
+            onResult(false,e.localizedMessage.toString())
             _authState.value= AuthState.Error(e.localizedMessage)
         }
     }
@@ -50,7 +50,7 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
 
                 }
                 .addOnFailureListener {
-                    onResult(false,"Registration Failed")
+                    onResult(false,it.localizedMessage.toString())
                     _authState.value= AuthState.Error(it.localizedMessage)
                 }
         }
@@ -68,7 +68,7 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
                     onResult(true,"Registered Successfully")
                 }
                 .addOnFailureListener {
-                    onResult(false,"Registration Failed")
+                    onResult(false,it.localizedMessage.toString())
                 }
         }
     }

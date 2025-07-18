@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +30,6 @@ import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.domain.navigation.NavigationHelper
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CustomCircleComponent
 import com.deepakjetpackcompose.crowtradingapp.ui.component.SwipeComponent
-import com.deepakjetpackcompose.crowtradingapp.ui.theme.Sansation
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 
@@ -138,7 +139,7 @@ fun OnBoardingScreen(modifier: Modifier = Modifier, navController: NavController
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.White,
-                fontFamily = Sansation,
+                fontFamily = FontFamily.SansSerif,
                 modifier = Modifier.constrainAs(titleText) {
                     top.linkTo(img.bottom, margin = 30.dp)
                     start.linkTo(parent.start)
