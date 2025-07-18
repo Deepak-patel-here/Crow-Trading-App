@@ -72,7 +72,7 @@ fun SignUpScreen(
 
     LaunchedEffect(authState.value) {
         if (authState.value == AuthState.Success) {
-            navController.navigate(NavigationHelper.HomeScreen) {
+            navController.navigate(NavigationHelper.AppScreen) {
                 popUpTo(NavigationHelper.LoginScreen) { inclusive = true }
             }
         }

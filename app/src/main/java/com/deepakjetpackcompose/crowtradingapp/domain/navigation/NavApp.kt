@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.AppScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.HomeScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.LoginScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.OnBoardingScreen
@@ -19,6 +20,7 @@ fun NavApp(modifier: Modifier = Modifier) {
         composable <NavigationHelper.LoginScreen>{ LoginScreen(navController = navController) }
         composable<NavigationHelper.SignUpScreen> { SignUpScreen(navController = navController) }
         composable <NavigationHelper.HomeScreen>{ HomeScreen(navController = navController) }
+        composable <NavigationHelper.AppScreen>{ AppScreen(navControl = navController) }
     }
 
 }
