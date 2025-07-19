@@ -38,7 +38,7 @@ fun AuthTextField(
     keyboardActions: KeyboardActions,
     modifier: Modifier = Modifier
 ) {
-    var isShow by remember { mutableStateOf(false) }
+    var isShow by remember { mutableStateOf(true) }
     OutlinedTextField(
         value = input,
         onValueChange = { onChange(it) },
@@ -54,7 +54,7 @@ fun AuthTextField(
                 tint = Color(0xFFFFA532)
             )
         },
-        visualTransformation = if (isShow) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (isShow)  VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             if (isPassword) {
                 IconButton(onClick = { isShow = !isShow }) {
