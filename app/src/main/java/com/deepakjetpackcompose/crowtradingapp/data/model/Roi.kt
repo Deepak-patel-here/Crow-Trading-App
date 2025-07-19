@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Roi(
-    val currency: String,
-    val percentage: Double,
-    val times: Double
+    val currency: String? = null,
+    val percentage: Double? = null,
+    val times: Double? = null
 )

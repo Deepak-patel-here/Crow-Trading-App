@@ -23,6 +23,7 @@ class CoinViewModel @Inject constructor(private val repo: CoinRepository): ViewM
         viewModelScope.launch (Dispatchers.IO){
             try {
                 val response=repo.getAllCoins()
+                _coinList.value= CoinList(loading = false, listOfCoins = response)
                 Log.d("api",response[0].toString())
             }catch(e: Exception){
                 _coinList.value=CoinList(loading = false,error = e.message.toString())
