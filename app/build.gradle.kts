@@ -93,4 +93,7 @@ dependencies {
     //constraint layout
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
+    //MpAndroidChart
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 }

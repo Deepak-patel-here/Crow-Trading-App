@@ -26,8 +26,16 @@ class CoinRepository @Inject constructor(private val apiClient: HttpClient)  {
             return emptyList<CryptoModelItem>()
         }
     }
-}
 
-fun main()= runBlocking {
-
+    suspend fun getRealTimeChart(coinId:String): List<List<Double>>?{
+        try {
+            val response = apiClient.get("$BASE_URL/$coinId/ohcl") {
+                parameter("vs_currency", "usd")
+                parameter("days", 1) // 1 = last 24 hours
+            }.body< List<List<Double>>>()
+            return response
+        }catch (e: Exception){
+            return emptyList()
+        }
+    }
 }

@@ -5,6 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deepakjetpackcompose.crowtradingapp.data.model.CryptoModelItem
 import com.deepakjetpackcompose.crowtradingapp.data.remote.CoinRepository
+import com.deepakjetpackcompose.crowtradingapp.domain.model.Candles
+import com.deepakjetpackcompose.crowtradingapp.domain.model.convertToCandleEntries
+import com.deepakjetpackcompose.crowtradingapp.domain.model.mapToCandleEntries
+import com.github.mikephil.charting.data.CandleEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +21,9 @@ class CoinViewModel @Inject constructor(private val repo: CoinRepository): ViewM
 
     private val _coinList= MutableStateFlow<CoinList>(CoinList())
     val coinList=_coinList.asStateFlow()
+
+    private val _coinChart = MutableStateFlow<CoinChart>(CoinChart())
+    val coinChart = _coinChart.asStateFlow()
 
     fun getAllCoins(){
         _coinList.value=CoinList(loading = true)
@@ -31,10 +38,33 @@ class CoinViewModel @Inject constructor(private val repo: CoinRepository): ViewM
         }
     }
 
+    fun getCoinChart(coinId:String){
+        _coinChart.value=CoinChart(loading = true)
+        viewModelScope.launch (Dispatchers.IO){
+            try {
+                val response: List<List<Double>>? =repo.getRealTimeChart(coinId)
+                if(response!=null) {
+                    val candles: List<Candles> = convertToCandleEntries(response)
+                    val candleEntry = mapToCandleEntries(data = candles)
+                    _coinChart.value=CoinChart(loading = false,listOfCoins = candleEntry)
+                }else
+                    _coinChart.value=CoinChart(loading = false,error = "No Data Found")
+            }catch (e: Exception){
+                _coinChart.value=CoinChart(loading = false,error = e.message.toString())
+            }
+        }
+    }
+
 
 }
 data class CoinList(
     val loading: Boolean=false,
     val listOfCoins: List<CryptoModelItem> =emptyList(),
+    val error: String=""
+)
+
+data class CoinChart(
+    val loading: Boolean=false,
+    val listOfCoins: List<CandleEntry> =emptyList(),
     val error: String=""
 )
