@@ -15,6 +15,7 @@ import androidx.navigation.NavController
 import com.deepakjetpackcompose.crowtradingapp.ui.component.TradingBottomAppBar
 import com.deepakjetpackcompose.crowtradingapp.ui.component.TradingTopAppBar
 import com.google.api.Control
+import javax.annotation.meta.When
 
 @Composable
 fun AppScreen(navControl: NavController,modifier: Modifier = Modifier) {
@@ -32,7 +33,12 @@ fun AppScreen(navControl: NavController,modifier: Modifier = Modifier) {
             }
         }
     ){innerPadding->
-        HomeScreen(navController = navControl, modifier = Modifier.padding(innerPadding))
+
+        when(isSelected.value){
+            1-> HomeScreen(navController = navControl, modifier = Modifier.padding(innerPadding))
+            3->FavoriteCoinScreen(navController = navControl, modifier = Modifier.padding(innerPadding))
+        }
+
     }
 
 }

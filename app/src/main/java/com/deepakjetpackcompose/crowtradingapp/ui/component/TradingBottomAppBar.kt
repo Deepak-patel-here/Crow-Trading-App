@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,14 +61,15 @@ fun TradingBottomAppBar(isSelected:Int,onIsSelected:(Int)->Unit,modifier: Modifi
         ) {
 
             bottomList.forEach { item ->
-                Icon(
-                    painter = painterResource(item.img),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clickable(onClick = { onIsSelected(item.id) }),
-                    tint=if(isSelected==item.id) Color(0xFFFFA532) else Color.Gray
-                )
+                IconButton(onClick = {onIsSelected(item.id)}) {
+                    Icon(
+                        painter = painterResource(item.img),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(30.dp),
+                        tint = if (isSelected == item.id) Color(0xFFFFA532) else Color.Gray
+                    )
+                }
             }
 
         }

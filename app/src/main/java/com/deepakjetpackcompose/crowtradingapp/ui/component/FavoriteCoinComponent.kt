@@ -1,6 +1,7 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +31,7 @@ import com.deepakjetpackcompose.crowtradingapp.domain.model.FirebaseCoinModel
 
 
 @Composable
-fun FavoriteCoinComponent(coin: FirebaseCoinModel, modifier: Modifier = Modifier) {
+fun FavoriteCoinComponent(coin: FirebaseCoinModel,onClick:()->Unit, modifier: Modifier = Modifier) {
     val percentage=toPercentage(coin.price_change_percentage_24h!!,100.00)
     val color=if(coin.price_change_percentage_24h!!>0) Color(0xFF02C173) else Color(0xFfE11A38)
     Column(
@@ -45,7 +46,9 @@ fun FavoriteCoinComponent(coin: FirebaseCoinModel, modifier: Modifier = Modifier
                         0.5f to Color(0xFF25231a).copy(alpha = 0.5f)   // Start blending into black at 20%
                     )
                 )
-            ).padding(20.dp)
+            )
+            .clickable(onClick =onClick )
+            .padding(20.dp)
     ) {
         Row (modifier = Modifier.width(100.dp).height(42.dp)){
             AsyncImage(model=coin.image,

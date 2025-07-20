@@ -143,8 +143,23 @@ fun HomeScreen(
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        items(favCoins.value){coins->
-                            FavoriteCoinComponent(coin = coins)
+                        items(favCoins.value){coin->
+                            FavoriteCoinComponent(coin = coin, onClick = {
+                                navController.navigate(
+                                    NavigationHelper.TradingScreen(
+                                        id = coin.id,
+                                        symbol = coin.symbol,
+                                        current_price = coin.current_price,
+                                        price_change_percentage_24h = coin.price_change_percentage_24h,
+                                        image = coin.image,
+                                        name = coin.name,
+                                        price = coin.price,
+                                        price_change_24h = coin.price_change_24h
+
+
+                                    )
+                                )
+                            })
                             Spacer(Modifier.width(15.dp))
 
                         }
