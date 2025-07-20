@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.deepakjetpackcompose.crowtradingapp.R
 
 @Composable
-fun TransactionButton(img:Int,title:String,onClick:()->Unit,modifier: Modifier = Modifier) {
+fun TransactionButton(img:Int?=null,title:String,onClick:()->Unit,color:Color=Color.White ,modifier: Modifier = Modifier) {
 
     Button(
         onClick = {},
@@ -30,18 +30,20 @@ fun TransactionButton(img:Int,title:String,onClick:()->Unit,modifier: Modifier =
             .width(163.dp)
             .height(48.dp),
         shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+        colors = ButtonDefaults.buttonColors(containerColor =color)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(img),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
+            if(img!=null) {
+                Image(
+                    painter = painterResource(img),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
 
             Text(title, fontSize = 16.sp, color = Color.Black)
         }

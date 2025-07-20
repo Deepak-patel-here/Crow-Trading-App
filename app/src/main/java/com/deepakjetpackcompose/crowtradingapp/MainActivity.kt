@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CrowTradingAppTheme {
+            CrowTradingAppTheme(darkTheme = true) {
                 NavApp()
             }
         }

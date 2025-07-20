@@ -26,11 +26,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.deepakjetpackcompose.crowtradingapp.domain.model.FirebaseCoinModel
 
 
-@Preview
 @Composable
-fun FavoriteCoinComponent(modifier: Modifier = Modifier) {
+fun FavoriteCoinComponent(coin: FirebaseCoinModel, modifier: Modifier = Modifier) {
+    val percentage=toPercentage(coin.price_change_percentage_24h!!,100.00)
+    val color=if(coin.price_change_percentage_24h!!>0) Color(0xFF02C173) else Color(0xFfE11A38)
     Column(
         modifier = Modifier
             .width(163.dp)
@@ -46,7 +48,7 @@ fun FavoriteCoinComponent(modifier: Modifier = Modifier) {
             ).padding(20.dp)
     ) {
         Row (modifier = Modifier.width(100.dp).height(42.dp)){
-            AsyncImage(model="",
+            AsyncImage(model=coin.image,
                 contentDescription = null,
                 modifier=Modifier.size(32.dp).clip(CircleShape),
                 contentScale = ContentScale.Crop)
@@ -54,8 +56,8 @@ fun FavoriteCoinComponent(modifier: Modifier = Modifier) {
             Spacer(Modifier.width(10.dp))
 
             Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-                Text("BTC", fontSize = 16.sp, color = Color.White)
-                Text("Bitcoin", fontSize = 14.sp, color = Color.LightGray, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                Text(coin.symbol.toString().toUpperCase(), fontSize = 16.sp, color = Color.White)
+                Text(coin.name.toString(), fontSize = 14.sp, color = Color.LightGray, overflow = TextOverflow.Ellipsis, maxLines = 1)
             }
 
             CryptoMiniGraph(data=emptyList(), lineColor = Color.Red
@@ -64,10 +66,11 @@ fun FavoriteCoinComponent(modifier: Modifier = Modifier) {
 
         Spacer(Modifier.height(20.dp))
         Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
-            Text("$15,240", fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold)
-            Text("0.25%", fontSize = 16.sp, color = Color.Red)
+            Text("$"+coin.current_price, fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(percentage, fontSize = 16.sp, color =color)
         }
-        Spacer(Modifier.height(2100.dp))
+        Spacer(Modifier.height(20.dp))
+        CryptoMiniGraph(data=coin.price!!, modifier = Modifier.fillMaxWidth().height(42.dp), lineColor = color)
 
     }
 }

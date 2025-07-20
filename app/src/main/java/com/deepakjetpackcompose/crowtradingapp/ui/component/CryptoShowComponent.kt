@@ -1,5 +1,6 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +32,8 @@ fun CryptoShowComponent(coinModel: CryptoModelItem, onClick:()->Unit,modifier: M
     val percentage=toPercentage(coinModel.price_change_percentage_24h,100.00)
     Row (modifier = modifier
         .fillMaxWidth()
-        .height(80.dp),
+        .height(80.dp)
+        .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically){
         AsyncImage(model = coinModel.image,
             contentDescription = null,

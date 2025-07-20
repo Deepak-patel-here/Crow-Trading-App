@@ -2,6 +2,7 @@ package com.deepakjetpackcompose.crowtradingapp.data.remote
 
 import com.deepakjetpackcompose.crowtradingapp.data.model.CryptoModelItem
 import com.deepakjetpackcompose.crowtradingapp.domain.constant.BASE_URL
+import com.deepakjetpackcompose.crowtradingapp.domain.constant.BASE_URL2
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -27,11 +28,13 @@ class CoinRepository @Inject constructor(private val apiClient: HttpClient)  {
         }
     }
 
-    suspend fun getRealTimeChart(coinId:String): List<List<Double>>?{
+    suspend fun getRealTimeChart(coinId: String = "bitcoin",
+                                 vsCurrency: String = "usd",
+                                 days: Int = 1): List<List<Double>>?{
         try {
-            val response = apiClient.get("$BASE_URL/$coinId/ohcl") {
-                parameter("vs_currency", "usd")
-                parameter("days", 1) // 1 = last 24 hours
+            val response = apiClient.get("https://api.coingecko.com/api/v3/coins/$coinId/ohlc") {
+                parameter("vs_currency", vsCurrency)
+                parameter("days", days) // 1 = last 24 hours
             }.body< List<List<Double>>>()
             return response
         }catch (e: Exception){

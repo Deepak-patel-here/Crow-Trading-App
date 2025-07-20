@@ -25,6 +25,8 @@ class CoinViewModel @Inject constructor(private val repo: CoinRepository): ViewM
     private val _coinChart = MutableStateFlow<CoinChart>(CoinChart())
     val coinChart = _coinChart.asStateFlow()
 
+
+
     fun getAllCoins(){
         _coinList.value=CoinList(loading = true)
         viewModelScope.launch (Dispatchers.IO){
@@ -39,10 +41,11 @@ class CoinViewModel @Inject constructor(private val repo: CoinRepository): ViewM
     }
 
     fun getCoinChart(coinId:String){
-        _coinChart.value=CoinChart(loading = true)
+        _coinChart.value=CoinChart(loading = true,listOfCoins = emptyList())
         viewModelScope.launch (Dispatchers.IO){
             try {
                 val response: List<List<Double>>? =repo.getRealTimeChart(coinId)
+                Log.d("api",response?.get(0).toString())
                 if(response!=null) {
                     val candles: List<Candles> = convertToCandleEntries(response)
                     val candleEntry = mapToCandleEntries(data = candles)

@@ -37,114 +37,156 @@ import com.deepakjetpackcompose.crowtradingapp.ui.component.TransactionButton
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.CoinViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import com.deepakjetpackcompose.crowtradingapp.data.model.SparklineIn7d
+import com.deepakjetpackcompose.crowtradingapp.domain.navigation.NavigationHelper
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CoinLoader
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CryptoShowComponent
 import com.deepakjetpackcompose.crowtradingapp.ui.component.FavoriteCoinComponent
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthState
+import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshState
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    coinViewModel: CoinViewModel = hiltViewModel<CoinViewModel>()
+    coinViewModel: CoinViewModel = hiltViewModel<CoinViewModel>(),
+    authViewModel: AuthViewModel=hiltViewModel<AuthViewModel>()
 ) {
 
     val coins = coinViewModel.coinList.collectAsState()
     val coinList = coins.value.listOfCoins
+    val isRefreshing = coins.value.loading
+    val favCoins=authViewModel.favCoinList.collectAsState()
+    val user=authViewModel.user.collectAsState()
+
+
+
 
     LaunchedEffect(Unit) {
         Log.d("COIN_DEBUG", "Updated coin list: ${coinList.size}")
+        Log.d("COIN_DEBUG","${favCoins.value.size}")
+        authViewModel.getUser()
+        authViewModel.fetchFavoriteCoins()
         coinViewModel.getAllCoins()
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFFEF6C00).copy(alpha = 0.2f),
-                        Color(0xFF3E2723).copy(alpha = 0.2f),
-                        Color(0xFF161514)
-                    ),
-                    center = Offset(500f, 0f),
-                    radius = 600f
-                )
-            )
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-            .statusBarsPadding()
-            .navigationBarsPadding()
+    SwipeRefresh(
+        state = remember { SwipeRefreshState(isRefreshing) },
+        onRefresh = {
+            coinViewModel.getAllCoins()
+        }
     ) {
-        Spacer(Modifier.height(70.dp))
-        Text("Total balance", color = Color.LightGray, fontSize = 16.sp)
-        Spacer(Modifier.height(6.dp))
-        Text(
-            "$5,450.500",
-            color = Color.White,
-            fontSize = 40.sp,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Bold
-        )
 
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-
-            TransactionButton(img = R.drawable.download_trading, title = "Deposit", onClick = {})
-            TransactionButton(img = R.drawable.upload, title = "Withdraw", onClick = {})
-        }
-
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(bottom = 80.dp)
-        ) {
-            item {
-                Text(
-                    "Favorites",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                .fillMaxSize()
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFFEF6C00).copy(alpha = 0.2f),
+                            Color(0xFF3E2723).copy(alpha = 0.2f),
+                            Color(0xFF161514)
+                        ),
+                        center = Offset(500f, 0f),
+                        radius = 600f
+                    )
                 )
-                Spacer(Modifier.height(20.dp))
+                .padding(horizontal = 20.dp, vertical = 10.dp)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            Spacer(Modifier.height(70.dp))
+            Text("Total balance", color = Color.LightGray, fontSize = 16.sp)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "$${user.value.balance}",
+                color = Color.White,
+                fontSize = 40.sp,
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Bold
+            )
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                TransactionButton(
+                    img = R.drawable.download_trading,
+                    title = "Deposit",
+                    onClick = {})
+                TransactionButton(img = R.drawable.upload, title = "Withdraw", onClick = {})
             }
-            item {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    items(2) {
-                        FavoriteCoinComponent()
-                    }
+
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(bottom = 80.dp)
+            ) {
+                item {
+                    Text(
+                        "Favorites",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(Modifier.height(20.dp))
+
                 }
-                Spacer(Modifier.height(20.dp))
+                item {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        items(favCoins.value){coins->
+                            FavoriteCoinComponent(coin = coins)
+                            Spacer(Modifier.width(15.dp))
+
+                        }
+                    }
+                    Spacer(Modifier.height(20.dp))
 
 
+                }
+
+                item {
+                    Text(
+                        "Popular cryptocurrencies",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    )
+                    Spacer(Modifier.height(10.dp))
+
+                }
+
+                items(coinList) { coin ->
+                    CryptoShowComponent(coinModel = coin, onClick = {
+                        navController.navigate(
+                            NavigationHelper.TradingScreen(
+                                id = coin.id,
+                                symbol = coin.symbol,
+                                current_price = coin.current_price,
+                                price_change_percentage_24h = coin.price_change_percentage_24h,
+                                image = coin.image,
+                                name = coin.name,
+                                price = coin.sparkline_in_7d!!.price,
+                                price_change_24h = coin.price_change_24h
+
+
+                            )
+                        )
+                    })
+                }
             }
 
-            item {
-                Text(
-                    "Popular cryptocurrencies",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 10.dp)
-                )
-                Spacer(Modifier.height(10.dp))
-
-            }
-
-            items(coinList) { coin ->
-                CryptoShowComponent(coinModel = coin, onClick = {})
-            }
         }
-
     }
     if (coins.value.loading) {
         Box(

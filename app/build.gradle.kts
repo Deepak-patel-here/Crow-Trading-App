@@ -95,5 +95,9 @@ dependencies {
 
     //MpAndroidChart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+   //swipe tp refresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.31.5-beta")
+
+
 
 }

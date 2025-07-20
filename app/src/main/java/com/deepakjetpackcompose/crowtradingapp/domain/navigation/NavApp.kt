@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.AppScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.HomeScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.LoginScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.OnBoardingScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.SignUpScreen
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.TradingScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -40,6 +42,22 @@ fun NavApp(modifier: Modifier = Modifier) {
             composable<NavigationHelper.SignUpScreen> { SignUpScreen(navController = navController) }
             composable<NavigationHelper.HomeScreen> { HomeScreen(navController = navController) }
             composable<NavigationHelper.AppScreen> { AppScreen(navControl = navController) }
+            composable<NavigationHelper.TradingScreen> {
+                val data = it.toRoute<NavigationHelper.TradingScreen>()
+                val id = data.id
+                TradingScreen(
+                    id=id?:"",
+                    symbol = data.symbol?:"",
+                    name=data.name?:"",
+                    currentPrice = data.current_price?:0.0,
+                    percentage = data.price_change_percentage_24h?:0.0,
+                    image = data.image?:"",
+                    price = data.price?:emptyList(),
+                    price_change_24h = data.price_change_24h?:0.0,
+                    navController = navController
+
+                )
+            }
         }
     }
 }
