@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.deepakjetpackcompose.crowtradingapp.data.model.CryptoModelItem
 import com.deepakjetpackcompose.crowtradingapp.data.model.SparklineIn7d
+import com.deepakjetpackcompose.crowtradingapp.domain.constant.BOUGHT
 import com.deepakjetpackcompose.crowtradingapp.domain.constant.USER
+import com.deepakjetpackcompose.crowtradingapp.domain.model.BuyCoinModel
 import com.deepakjetpackcompose.crowtradingapp.domain.model.FirebaseCoinModel
 import com.deepakjetpackcompose.crowtradingapp.domain.model.User
 import com.google.firebase.auth.FirebaseAuth
@@ -27,6 +29,9 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
 
     private  val _user=MutableStateFlow(User())
     val user=_user.asStateFlow()
+
+    private val _loading=MutableStateFlow<UpdateBalance>(UpdateBalance.Idle)
+    val loading= _loading.asStateFlow()
 
 
     fun login(email:String,password:String,onResult:(Boolean,String)->Unit){
@@ -192,6 +197,138 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
     }
 
 
+    fun updateAccount(amount:String,sign:String,onResult:(Boolean,String)->Unit){
+        val updatedAmount=amount.trim()
+        Log.d("balance",updatedAmount)
+        _loading.value= UpdateBalance.Loading
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            return
+        }
+
+        val accountRef=firestore.collection(USER).document(userId)
+
+        firestore.runTransaction { transaction ->
+            val snapshot=transaction.get(accountRef)
+            val currentBalance=snapshot.getString("balance")?:"0.00"
+            val updateBalance=if(sign=="+"){
+                currentBalance.toDouble()+updatedAmount.toDouble()
+            }else{
+                currentBalance.toDouble()-updatedAmount.toDouble()
+            }
+            transaction.update(accountRef,"balance",updateBalance.toString())
+        }
+            .addOnSuccessListener {
+                _loading.value= UpdateBalance.Success
+                onResult(true,"transaction Successful")
+
+            }
+            .addOnFailureListener {
+                _loading.value= UpdateBalance.Error
+                onResult(false,"transaction failed")
+            }
+    }
+
+    fun buyCoin(buyModel: BuyCoinModel, quantityToBuy: Int, onResult: (Boolean, String) -> Unit) {
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            onResult(false, "User not authenticated")
+            return
+        }
+
+        val coinRef = firestore.collection(USER).document(userId).collection(BOUGHT).document(buyModel.id ?: "")
+        val userRef = firestore.collection(USER).document(userId)
+
+        firestore.runTransaction { transaction ->
+            val userSnapshot = transaction.get(userRef)
+            val currentBalance = userSnapshot.getString("balance")?.toDoubleOrNull() ?: 0.0
+
+            val coinSnapshot = transaction.get(coinRef)
+            val currentPrice = buyModel.current_price ?: throw Exception("Price unavailable")
+            val totalCost = quantityToBuy * currentPrice
+
+            if (totalCost > currentBalance) {
+                throw Exception("Insufficient balance to complete the purchase")
+            }
+
+            val newBalance = currentBalance - totalCost
+            transaction.update(userRef, "balance", newBalance.toString())
+
+            // If already bought this coin, update quantity
+            if (coinSnapshot.exists()) {
+                val existingCoin = coinSnapshot.toObject(BuyCoinModel::class.java)
+                val existingQty = existingCoin?.coinCnt ?: 0
+                val updatedCoin = existingCoin?.copy(
+                    coinCnt = existingQty + quantityToBuy,
+                    boughtPrice = currentPrice // optional update
+                )
+                updatedCoin?.let {
+                    transaction.set(coinRef, it)
+                }
+            } else {
+                // New purchase
+                val newCoin = buyModel.copy(
+                    coinCnt = quantityToBuy,
+                    boughtPrice = currentPrice
+                )
+                transaction.set(coinRef, newCoin)
+            }
+        }.addOnSuccessListener {
+            onResult(true, "Coin bought successfully")
+        }.addOnFailureListener { e ->
+            onResult(false, e.localizedMessage ?: "Buy transaction failed")
+        }
+    }
+
+
+    fun sellCoin(boughtModel: BuyCoinModel,onResult:(Boolean,String)->Unit){
+        val userId = auth.currentUser?.uid ?: return
+
+        val coinRef = firestore.collection(USER).document(userId).collection(BOUGHT).document(boughtModel.id.toString())
+        val userRef = firestore.collection(USER).document(userId)
+
+        firestore.runTransaction { transaction ->
+            val coinSnapshot = transaction.get(coinRef)
+            val userSnapshot = transaction.get(userRef)
+
+            if (!coinSnapshot.exists()) {
+                throw Exception("Coin not found in your portfolio.")
+            }
+
+            val ownedCoin = coinSnapshot.toObject(BuyCoinModel::class.java)
+                ?: throw Exception("Failed to parse coin data.")
+
+            val ownedQuantity = ownedCoin.coinCnt ?: 0
+            if (boughtModel.coinCnt?:0 > ownedQuantity) {
+                throw Exception("You don’t have enough coins.")
+            }
+
+            val currentBalance = userSnapshot.getString("balance")?.toDoubleOrNull() ?: 0.0
+            val sellAmount = boughtModel.coinCnt?:0 * boughtModel.current_price?.toDouble()!!
+            val updatedBalance = currentBalance + sellAmount.toDouble()
+
+            // Update user balance
+            transaction.update(userRef, "balance", updatedBalance.toString())
+
+            if (boughtModel.coinCnt?:0 == ownedQuantity) {
+                // Remove the coin entry
+                transaction.delete(coinRef)
+            } else {
+                // Update the remaining quantity
+                val updatedCoin = ownedCoin.copy(coinCnt = ownedQuantity - boughtModel.coinCnt!!)
+                transaction.set(coinRef, updatedCoin)
+            }
+        }.addOnSuccessListener {
+            onResult(true, "Transaction successful")
+        }.addOnFailureListener { e ->
+            onResult(false, e.localizedMessage ?: "Transaction failed")
+        }
+
+
+    }
+
+
+
 
 
 
@@ -202,4 +339,11 @@ sealed class AuthState{
     object Loading: AuthState()
     object Success: AuthState()
     data class Error(val msg:String?): AuthState()
+}
+
+sealed class UpdateBalance{
+    object Idle: UpdateBalance()
+    object Loading: UpdateBalance()
+    object Success: UpdateBalance()
+    object Error:UpdateBalance()
 }

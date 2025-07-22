@@ -30,4 +30,17 @@ sealed class NavigationHelper {
                              val name:String?=null,
                              val price: List<Double>?=null,
                              val price_change_24h: Double? = null,): NavigationHelper()
+
+    @Serializable
+    object PaymentScreen: NavigationHelper()
+
+    @Serializable
+    object SuccessfulPaymentScreen: NavigationHelper()
+
+    @Serializable
+    data class WithdrawScreen(val balance:String): NavigationHelper()
+
+    @Serializable
+    object SuccessfulWithdrawScreen: NavigationHelper()
+
 }

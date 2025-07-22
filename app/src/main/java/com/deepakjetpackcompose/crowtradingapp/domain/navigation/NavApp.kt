@@ -15,8 +15,12 @@ import com.deepakjetpackcompose.crowtradingapp.ui.screens.AppScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.HomeScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.LoginScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.OnBoardingScreen
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.PaymentScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.SignUpScreen
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.SuccessfulPaymentScreen
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.SuccessfulWithdrawScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.TradingScreen
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.WithdrawScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -58,6 +62,15 @@ fun NavApp(modifier: Modifier = Modifier) {
 
                 )
             }
+
+            composable<NavigationHelper.PaymentScreen> { PaymentScreen(navController = navController) }
+            composable<NavigationHelper.SuccessfulPaymentScreen> { SuccessfulPaymentScreen(navController = navController) }
+
+            composable<NavigationHelper.WithdrawScreen> {
+                val data=it.toRoute<NavigationHelper.WithdrawScreen>()
+                WithdrawScreen(balance = data.balance, navController = navController)
+            }
+            composable<NavigationHelper.SuccessfulWithdrawScreen> { SuccessfulWithdrawScreen(navController = navController) }
         }
     }
 }

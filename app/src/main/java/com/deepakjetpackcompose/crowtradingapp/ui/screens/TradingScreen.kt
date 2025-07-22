@@ -31,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -63,11 +65,12 @@ fun TradingScreen(
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
 ) {
     val context = LocalContext.current
-    var isFav = authViewModel.isFav.collectAsState()
+    val isFav = authViewModel.isFav.collectAsState()
     val coinChart = coinViewModel.coinChart.collectAsStateWithLifecycle()
     val data = coinChart.value.listOfCoins
     val truePercentage = toPercentage(value = percentage, total = 100.00)
     val color = if (percentage > 0) Color(0xFF02C173) else Color(0xFfE11A38)
+    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         authViewModel.isCoinFavorite(id)
@@ -195,6 +198,13 @@ fun TradingScreen(
             contentAlignment = Alignment.Center
         ) {
             CoinLoader(size = 300.dp)
+        }
+    }
+    if(showDialog){
+        Dialog(onDismissRequest = {showDialog=false},
+            properties = DialogProperties(dismissOnClickOutside = true)) {
+
+
         }
     }
 

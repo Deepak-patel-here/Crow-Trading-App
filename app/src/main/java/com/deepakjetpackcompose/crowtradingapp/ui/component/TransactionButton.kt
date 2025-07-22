@@ -22,10 +22,11 @@ import androidx.compose.ui.unit.sp
 import com.deepakjetpackcompose.crowtradingapp.R
 
 @Composable
-fun TransactionButton(img:Int?=null,title:String,onClick:()->Unit,color:Color=Color.White ,modifier: Modifier = Modifier) {
+fun
+        TransactionButton(img:Int?=null,title:String,onClick:()->Unit,color:Color=Color.White ,modifier: Modifier = Modifier) {
 
     Button(
-        onClick = {},
+        onClick = onClick,
         modifier = Modifier
             .width(163.dp)
             .height(48.dp),

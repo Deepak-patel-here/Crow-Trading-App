@@ -119,8 +119,12 @@ fun HomeScreen(
                 TransactionButton(
                     img = R.drawable.download_trading,
                     title = "Deposit",
-                    onClick = {})
-                TransactionButton(img = R.drawable.upload, title = "Withdraw", onClick = {})
+                    onClick = {
+                        navController.navigate(NavigationHelper.PaymentScreen)
+                    })
+                TransactionButton(img = R.drawable.upload, title = "Withdraw", onClick = {
+                    navController.navigate(NavigationHelper.WithdrawScreen(balance = user.value.balance.toString()))
+                })
             }
 
             LazyColumn(
