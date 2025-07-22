@@ -53,13 +53,13 @@ fun NavApp(modifier: Modifier = Modifier) {
                     id=id?:"",
                     symbol = data.symbol?:"",
                     name=data.name?:"",
+                    balance = data.balance?:0.0,
                     currentPrice = data.current_price?:0.0,
                     percentage = data.price_change_percentage_24h?:0.0,
                     image = data.image?:"",
                     price = data.price?:emptyList(),
                     price_change_24h = data.price_change_24h?:0.0,
                     navController = navController
-
                 )
             }
 

@@ -158,7 +158,8 @@ fun HomeScreen(
                                         image = coin.image,
                                         name = coin.name,
                                         price = coin.price,
-                                        price_change_24h = coin.price_change_24h
+                                        price_change_24h = coin.price_change_24h,
+                                        balance = user.value.balance?.toDouble()
 
 
                                     )
@@ -196,7 +197,8 @@ fun HomeScreen(
                                 image = coin.image,
                                 name = coin.name,
                                 price = coin.sparkline_in_7d!!.price,
-                                price_change_24h = coin.price_change_24h
+                                price_change_24h = coin.price_change_24h,
+                                balance = user.value.balance?.toDouble()
 
 
                             )

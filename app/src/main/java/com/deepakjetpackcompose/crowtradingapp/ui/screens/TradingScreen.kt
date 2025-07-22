@@ -1,6 +1,11 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +18,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.data.model.SparklineIn7d
+import com.deepakjetpackcompose.crowtradingapp.ui.component.BuyComponent
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CandleChartView
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CoinLoader
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CustomDropDownComponent
@@ -60,6 +69,7 @@ fun TradingScreen(
     name: String,
     price:List<Double>,
     price_change_24h: Double,
+    balance:Double,
     modifier: Modifier = Modifier,
     coinViewModel: CoinViewModel = hiltViewModel<CoinViewModel>(),
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
@@ -182,7 +192,7 @@ fun TradingScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            TransactionButton(title = "Buy", onClick = {}, color = Color(0xFF02C173))
+            TransactionButton(title = "Buy", onClick = {showDialog=true}, color = Color(0xFF02C173))
             TransactionButton(title = "Sell", onClick = {}, color = Color(0xFfE11A38))
         }
 
@@ -205,6 +215,18 @@ fun TradingScreen(
             properties = DialogProperties(dismissOnClickOutside = true)) {
 
 
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut()
+            ) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+                ) {
+                    BuyComponent(name = name, symbol = symbol, currentPrice = currentPrice, image = image, balance = balance)
+                }
+            }
         }
     }
 
