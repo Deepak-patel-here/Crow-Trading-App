@@ -31,12 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -45,8 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.deepakjetpackcompose.crowtradingapp.R
-import com.deepakjetpackcompose.crowtradingapp.data.model.SparklineIn7d
-import com.deepakjetpackcompose.crowtradingapp.ui.component.BuyComponent
+import com.deepakjetpackcompose.crowtradingapp.domain.model.BuyCoinModel
+import com.deepakjetpackcompose.crowtradingapp.ui.component.BuyCoinDialog
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CandleChartView
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CoinLoader
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CustomDropDownComponent
@@ -55,6 +53,7 @@ import com.deepakjetpackcompose.crowtradingapp.ui.component.TransactionButton
 import com.deepakjetpackcompose.crowtradingapp.ui.component.toPercentage
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.CoinViewModel
+import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.UpdateBalance
 import kotlinx.coroutines.delay
 
 
@@ -67,9 +66,9 @@ fun TradingScreen(
     percentage: Double,
     image: String,
     name: String,
-    price:List<Double>,
+    price: List<Double>,
     price_change_24h: Double,
-    balance:Double,
+    balance: Double,
     modifier: Modifier = Modifier,
     coinViewModel: CoinViewModel = hiltViewModel<CoinViewModel>(),
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
@@ -81,6 +80,7 @@ fun TradingScreen(
     val truePercentage = toPercentage(value = percentage, total = 100.00)
     val color = if (percentage > 0) Color(0xFF02C173) else Color(0xFfE11A38)
     var showDialog by remember { mutableStateOf(false) }
+    val loading=authViewModel.loading.collectAsState()
 
     LaunchedEffect(Unit) {
         authViewModel.isCoinFavorite(id)
@@ -146,9 +146,8 @@ fun TradingScreen(
                         symbol = symbol,
                         percentage = percentage,
                         sparklineIn7d = price
-                    ){
-                            success,msg->
-                       Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    ) { success, msg ->
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                     }
 
                 })
@@ -192,7 +191,11 @@ fun TradingScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            TransactionButton(title = "Buy", onClick = {showDialog=true}, color = Color(0xFF02C173))
+            TransactionButton(
+                title = "Buy",
+                onClick = { showDialog = true },
+                color = Color(0xFF02C173)
+            )
             TransactionButton(title = "Sell", onClick = {}, color = Color(0xFfE11A38))
         }
 
@@ -210,9 +213,11 @@ fun TradingScreen(
             CoinLoader(size = 300.dp)
         }
     }
-    if(showDialog){
-        Dialog(onDismissRequest = {showDialog=false},
-            properties = DialogProperties(dismissOnClickOutside = true)) {
+    if (showDialog) {
+        Dialog(
+            onDismissRequest = { showDialog = false },
+            properties = DialogProperties(dismissOnClickOutside = true)
+        ) {
 
 
             AnimatedVisibility(
@@ -224,11 +229,54 @@ fun TradingScreen(
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
                 ) {
-                    BuyComponent(name = name, symbol = symbol, currentPrice = currentPrice, image = image, balance = balance)
+                    BuyCoinDialog(
+                        name = name,
+                        symbol = symbol,
+                        price = currentPrice,
+                        image = image,
+                        balance = balance,
+                        onBuy = {cnt,payable->
+                           val  coinModel= BuyCoinModel(
+                                id=id,
+                               symbol = symbol,
+                               name = name,
+                               image = image,
+                               current_price = currentPrice,
+                               price_change_percentage_24h = percentage,
+                               price = price,
+                               price_change_24h = price_change_24h,
+                               boughtPrice = payable,
+                               coinCnt = cnt
+
+                            )
+                            authViewModel.buyCoin(
+                                buyModel = coinModel,
+                                quantityToBuy = cnt,
+                            ){
+                                    success, msg ->
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
+
+                            showDialog=false
+                        },
+                        onCancel = { showDialog = false })
                 }
             }
         }
     }
+
+    if(loading.value== UpdateBalance.Loading){
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.6f)), // semi-transparent overlay
+            contentAlignment = Alignment.Center
+        ) {
+            CoinLoader(size = 300.dp)
+        }
+    }
+
+
 
 
 }

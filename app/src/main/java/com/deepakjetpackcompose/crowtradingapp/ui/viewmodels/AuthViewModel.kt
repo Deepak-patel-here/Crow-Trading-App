@@ -230,6 +230,7 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
     }
 
     fun buyCoin(buyModel: BuyCoinModel, quantityToBuy: Int, onResult: (Boolean, String) -> Unit) {
+        _loading.value= UpdateBalance.Loading
         val userId = auth.currentUser?.uid
         if (userId == null) {
             onResult(false, "User not authenticated")
@@ -251,7 +252,8 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
                 throw Exception("Insufficient balance to complete the purchase")
             }
 
-            val newBalance = currentBalance - totalCost
+            val updatedBalance = currentBalance - totalCost
+            val newBalance=String.format("%.2f", updatedBalance).toDouble()
             transaction.update(userRef, "balance", newBalance.toString())
 
             // If already bought this coin, update quantity
@@ -275,13 +277,19 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
             }
         }.addOnSuccessListener {
             onResult(true, "Coin bought successfully")
+            _loading.value= UpdateBalance.Success
+
         }.addOnFailureListener { e ->
             onResult(false, e.localizedMessage ?: "Buy transaction failed")
+            _loading.value= UpdateBalance.Error
+
         }
     }
 
 
     fun sellCoin(boughtModel: BuyCoinModel,onResult:(Boolean,String)->Unit){
+        _loading.value= UpdateBalance.Loading
+
         val userId = auth.currentUser?.uid ?: return
 
         val coinRef = firestore.collection(USER).document(userId).collection(BOUGHT).document(boughtModel.id.toString())
@@ -305,7 +313,9 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
 
             val currentBalance = userSnapshot.getString("balance")?.toDoubleOrNull() ?: 0.0
             val sellAmount = boughtModel.coinCnt?:0 * boughtModel.current_price?.toDouble()!!
-            val updatedBalance = currentBalance + sellAmount.toDouble()
+            val newBalance = currentBalance + sellAmount.toDouble()
+            val updatedBalance=String.format("%.2f", newBalance).toDouble()
+
 
             // Update user balance
             transaction.update(userRef, "balance", updatedBalance.toString())
@@ -319,9 +329,11 @@ class AuthViewModel @Inject constructor(private val auth: FirebaseAuth,private v
                 transaction.set(coinRef, updatedCoin)
             }
         }.addOnSuccessListener {
+            _loading.value= UpdateBalance.Success
             onResult(true, "Transaction successful")
         }.addOnFailureListener { e ->
             onResult(false, e.localizedMessage ?: "Transaction failed")
+            _loading.value= UpdateBalance.Error
         }
 
 
