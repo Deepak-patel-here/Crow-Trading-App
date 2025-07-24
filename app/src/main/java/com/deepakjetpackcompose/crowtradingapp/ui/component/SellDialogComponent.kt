@@ -1,7 +1,6 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -28,8 +27,10 @@ fun SellDialogComponent(
     name: String,
     currentPrice: Double,
     boughtPrice: Double,
+    boughtCoinCount: Int, // 👈 NEW PARAMETER
     onCancel: () -> Unit,
-    onSell: (Int) -> Unit
+    onSell: (Int) -> Unit,
+    symbol: String
 ) {
     var coinCount by remember { mutableIntStateOf(1) }
     val profitOrLoss = ((currentPrice - boughtPrice) / boughtPrice) * 100
@@ -52,7 +53,6 @@ fun SellDialogComponent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Sell Coin", fontSize = 20.sp, color = Color.White)
-
             Spacer(Modifier.height(16.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -73,6 +73,7 @@ fun SellDialogComponent(
 
             Text("Current Price: $${String.format("%.2f", currentPrice)}", color = Color.LightGray)
             Text("Bought Price: $${String.format("%.2f", boughtPrice)}", color = Color.LightGray)
+            Text("Bought Coins: $boughtCoinCount", color = Color.LightGray)
             Text(
                 "${String.format("%.2f", profitOrLoss)}%",
                 color = profitColor,
@@ -87,8 +88,12 @@ fun SellDialogComponent(
                 }) {
                     Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = Color.White)
                 }
+
                 Text(coinCount.toString(), fontSize = 18.sp, color = Color.White)
-                IconButton(onClick = { coinCount++ }) {
+
+                IconButton(onClick = {
+                    if (coinCount < boughtCoinCount) coinCount++
+                }) {
                     Icon(Icons.Default.KeyboardArrowUp, contentDescription = null, tint = Color.White)
                 }
             }
@@ -124,3 +129,4 @@ fun SellDialogComponent(
         }
     }
 }
+

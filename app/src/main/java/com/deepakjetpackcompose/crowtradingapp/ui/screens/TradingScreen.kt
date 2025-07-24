@@ -49,6 +49,7 @@ import com.deepakjetpackcompose.crowtradingapp.ui.component.CandleChartView
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CoinLoader
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CustomDropDownComponent
 import com.deepakjetpackcompose.crowtradingapp.ui.component.GlassMorphismIconComponent
+import com.deepakjetpackcompose.crowtradingapp.ui.component.SellDialogComponent
 import com.deepakjetpackcompose.crowtradingapp.ui.component.TransactionButton
 import com.deepakjetpackcompose.crowtradingapp.ui.component.toPercentage
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
@@ -80,7 +81,15 @@ fun TradingScreen(
     val truePercentage = toPercentage(value = percentage, total = 100.00)
     val color = if (percentage > 0) Color(0xFF02C173) else Color(0xFfE11A38)
     var showDialog by remember { mutableStateOf(false) }
-    val loading=authViewModel.loading.collectAsState()
+    var showDialogForSell by remember { mutableStateOf(false) }
+    val loading = authViewModel.loading.collectAsState()
+
+    val coinData = authViewModel.singleBoughtCoin.collectAsState()
+
+    LaunchedEffect(Unit) {
+        authViewModel.fetchBoughtCoinById(id)
+    }
+
 
     LaunchedEffect(Unit) {
         authViewModel.isCoinFavorite(id)
@@ -196,7 +205,7 @@ fun TradingScreen(
                 onClick = { showDialog = true },
                 color = Color(0xFF02C173)
             )
-            TransactionButton(title = "Sell", onClick = {}, color = Color(0xFfE11A38))
+            TransactionButton(title = "Sell", onClick = {showDialogForSell=true}, color = Color(0xFfE11A38))
         }
 
         Spacer(Modifier.height(25.dp))
@@ -235,29 +244,28 @@ fun TradingScreen(
                         price = currentPrice,
                         image = image,
                         balance = balance,
-                        onBuy = {cnt,payable->
-                           val  coinModel= BuyCoinModel(
-                                id=id,
-                               symbol = symbol,
-                               name = name,
-                               image = image,
-                               current_price = currentPrice,
-                               price_change_percentage_24h = percentage,
-                               price = price,
-                               price_change_24h = price_change_24h,
-                               boughtPrice = payable,
-                               coinCnt = cnt
+                        onBuy = { cnt, payable ->
+                            val coinModel = BuyCoinModel(
+                                id = id,
+                                symbol = symbol,
+                                name = name,
+                                image = image,
+                                current_price = currentPrice,
+                                price_change_percentage_24h = percentage,
+                                price = price,
+                                price_change_24h = price_change_24h,
+                                boughtPrice = payable,
+                                coinCnt = cnt
 
                             )
                             authViewModel.buyCoin(
                                 buyModel = coinModel,
                                 quantityToBuy = cnt,
-                            ){
-                                    success, msg ->
+                            ) { success, msg ->
                                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                             }
 
-                            showDialog=false
+                            showDialog = false
                         },
                         onCancel = { showDialog = false })
                 }
@@ -265,7 +273,59 @@ fun TradingScreen(
         }
     }
 
-    if(loading.value== UpdateBalance.Loading){
+    if (showDialogForSell) {
+        Dialog(
+            onDismissRequest = { showDialogForSell = false },
+            properties = DialogProperties(dismissOnClickOutside = true)
+        ) {
+
+
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut()
+            ) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+                ) {
+                    SellDialogComponent(
+                        image = image,
+                        name = name,
+                        symbol = symbol,
+                        currentPrice = currentPrice,
+                        boughtPrice = coinData.value?.boughtPrice ?: 0.0,
+                        boughtCoinCount = coinData.value?.coinCnt ?: 0,
+                        onSell = { cnt ->
+                            val coinModel = BuyCoinModel(
+                                id = id,
+                                symbol = symbol,
+                                name = name,
+                                image = image,
+                                current_price = currentPrice,
+                                price_change_percentage_24h = percentage,
+                                price = price,
+                                price_change_24h = price_change_24h,
+                                boughtPrice = coinData.value?.boughtPrice ?: 0.0,
+                                coinCnt = cnt
+                            )
+                            authViewModel.sellCoin(coinModel) { success, msg ->
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
+                            showDialogForSell = false
+
+                        },
+                        onCancel = { showDialogForSell = false }
+                    )
+
+
+
+                }
+            }
+        }
+    }
+
+    if (loading.value == UpdateBalance.Loading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -275,8 +335,4 @@ fun TradingScreen(
             CoinLoader(size = 300.dp)
         }
     }
-
-
-
-
 }
