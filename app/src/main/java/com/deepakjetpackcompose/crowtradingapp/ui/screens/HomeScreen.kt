@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -36,8 +36,11 @@ import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.ui.component.TransactionButton
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.CoinViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
 import com.deepakjetpackcompose.crowtradingapp.data.model.SparklineIn7d
 import com.deepakjetpackcompose.crowtradingapp.domain.navigation.NavigationHelper
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CoinLoader
@@ -65,12 +68,14 @@ fun HomeScreen(
 
 
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(navController.currentBackStackEntry) {
         Log.d("COIN_DEBUG", "Updated coin list: ${coinList.size}")
         Log.d("COIN_DEBUG","${favCoins.value.size}")
         authViewModel.getUser()
         authViewModel.fetchFavoriteCoins()
-        coinViewModel.getAllCoins()
+        if(coinList.isEmpty()) {
+            coinViewModel.getAllCoins()
+        }
     }
     SwipeRefresh(
         state = remember { SwipeRefreshState(isRefreshing) },
@@ -83,15 +88,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            Color(0xFFEF6C00).copy(alpha = 0.2f),
-                            Color(0xFF3E2723).copy(alpha = 0.2f),
-                            Color(0xFF161514)
-                        ),
-                        center = Offset(500f, 0f),
-                        radius = 600f
-                    )
+                    Color(0xFF161514)
                 )
                 .padding(horizontal = 20.dp, vertical = 10.dp)
                 .statusBarsPadding()
@@ -134,13 +131,15 @@ fun HomeScreen(
                     .padding(bottom = 80.dp)
             ) {
                 item {
-                    Text(
-                        "Favorites",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Spacer(Modifier.height(20.dp))
+                    if(favCoins.value.isNotEmpty()) {
+                        Text(
+                            "Favorites",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                        )
+                        Spacer(Modifier.height(20.dp))
+                    }
 
                 }
                 item {
@@ -175,14 +174,38 @@ fun HomeScreen(
                 }
 
                 item {
-                    Text(
-                        "Popular cryptocurrencies",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier.padding(vertical = 10.dp)
-                    )
-                    Spacer(Modifier.height(10.dp))
+                    if(coinList.isNotEmpty()) {
+                        Text(
+                            "Popular cryptocurrencies",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(vertical = 10.dp)
+                        )
+                        Spacer(Modifier.height(10.dp))
+                    }else{
+                        Box(
+                            modifier = Modifier
+                                .fillParentMaxHeight()
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    painter = painterResource(R.drawable.coin),
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(80.dp)
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    text = "No coins found, please try again",
+                                    color = Color.White
+                                )
+                            }
+                        }
+
+                    }
 
                 }
 

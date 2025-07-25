@@ -1,7 +1,11 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.deepakjetpackcompose.crowtradingapp.data.model.CryptoModelItem
 import com.deepakjetpackcompose.crowtradingapp.data.model.SparklineIn7d
 import com.deepakjetpackcompose.crowtradingapp.domain.constant.BOUGHT
@@ -17,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,6 +59,8 @@ class AuthViewModel @Inject constructor(
 
     private val _profileLoader=MutableStateFlow<Boolean>(false)
     val profileLoading= _profileLoader.asStateFlow()
+
+    val isSelected= mutableIntStateOf(1)
 
 
 
@@ -479,6 +486,14 @@ class AuthViewModel @Inject constructor(
                 _boughtCoins.value = emptyList()
                 _profileLoader.value=false
             }
+    }
+
+    fun updateProfileImage(imageUrl: String) {
+        val userId = auth.currentUser?.uid
+        if(userId!=null) {
+            firestore.collection(USER).document(userId)
+                .update("image", imageUrl)
+        }
     }
 
 

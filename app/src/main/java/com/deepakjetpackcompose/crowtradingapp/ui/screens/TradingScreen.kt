@@ -83,6 +83,7 @@ fun TradingScreen(
     var showDialog by remember { mutableStateOf(false) }
     var showDialogForSell by remember { mutableStateOf(false) }
     val loading = authViewModel.loading.collectAsState()
+    val isStar=remember { mutableStateOf(isFav.value) }
 
     val coinData = authViewModel.singleBoughtCoin.collectAsState()
 
@@ -158,6 +159,8 @@ fun TradingScreen(
                     ) { success, msg ->
                         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                     }
+
+                    isStar.value=!isStar.value
 
                 })
         }

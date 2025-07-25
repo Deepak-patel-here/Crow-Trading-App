@@ -10,16 +10,18 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.deepakjetpackcompose.crowtradingapp.ui.component.TradingBottomAppBar
 import com.deepakjetpackcompose.crowtradingapp.ui.component.TradingTopAppBar
+import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
 
 @Composable
-fun AppScreen(navControl: NavController,modifier: Modifier = Modifier) {
-    val isSelected= remember{ mutableIntStateOf(1) }
+fun AppScreen(navControl: NavController,modifier: Modifier = Modifier,authViewModel: AuthViewModel= hiltViewModel<AuthViewModel>()) {
+    val isSelected= authViewModel.isSelected
     Scaffold (
         topBar = {
-            TradingTopAppBar(modifier = modifier.statusBarsPadding())
+            TradingTopAppBar(onClick1 = {isSelected.intValue=4}, modifier = modifier.statusBarsPadding())
         },
 
         bottomBar = {
@@ -31,7 +33,7 @@ fun AppScreen(navControl: NavController,modifier: Modifier = Modifier) {
         }
     ){innerPadding->
 
-        when(isSelected.value){
+        when(isSelected.intValue){
             1-> HomeScreen(navController = navControl, modifier = Modifier.padding(innerPadding))
             2->AllCoinScreen(navController = navControl,modifier = Modifier.padding(innerPadding))
             3->FavoriteCoinScreen(navController = navControl, modifier = Modifier.padding(innerPadding))

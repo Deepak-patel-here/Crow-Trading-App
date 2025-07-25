@@ -2,28 +2,35 @@ package com.deepakjetpackcompose.crowtradingapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.domain.navigation.NavigationHelper
 import com.deepakjetpackcompose.crowtradingapp.ui.component.FavoriteCoinComponent
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
@@ -57,26 +64,55 @@ fun FavoriteCoinScreen(navController: NavController, modifier: Modifier = Modifi
             color = Color.White
         )
         Spacer(Modifier.height(20.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(favCoin.value){coin->
-                FavoriteCoinComponent(coin=coin, onClick = {
-                    navController.navigate(
-                        NavigationHelper.TradingScreen(
-                            id = coin.id,
-                            symbol = coin.symbol,
-                            current_price = coin.current_price,
-                            price_change_percentage_24h = coin.price_change_percentage_24h,
-                            image = coin.image,
-                            name = coin.name,
-                            price = coin.price,
-                            price_change_24h = coin.price_change_24h
+        if(favCoin.value.isNotEmpty()) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(favCoin.value) { coin ->
+                    FavoriteCoinComponent(coin = coin, onClick = {
+                        navController.navigate(
+                            NavigationHelper.TradingScreen(
+                                id = coin.id,
+                                symbol = coin.symbol,
+                                current_price = coin.current_price,
+                                price_change_percentage_24h = coin.price_change_percentage_24h,
+                                image = coin.image,
+                                name = coin.name,
+                                price = coin.price,
+                                price_change_24h = coin.price_change_24h
 
 
+                            )
                         )
-                    )
-                })
+                    })
 
+                }
             }
+        }else{
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(R.drawable.coin),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "No coins found, please try again",
+                        color = Color.White
+                    )
+                }
+            }
+
         }
 
 

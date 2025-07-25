@@ -7,4 +7,5 @@ data class User(
     val portfolio: List<Portfolio>?=emptyList(),
     val totalPnl:String?="",
     val transaction: List<Transaction>?=emptyList(),
+    val image:String?=""
 )

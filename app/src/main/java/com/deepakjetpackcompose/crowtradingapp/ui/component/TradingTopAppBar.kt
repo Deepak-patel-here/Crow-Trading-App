@@ -15,14 +15,14 @@ import com.deepakjetpackcompose.crowtradingapp.R
 
 @Preview
 @Composable
-fun TradingTopAppBar(modifier: Modifier = Modifier) {
+fun TradingTopAppBar(onClick1:()->Unit={},onClick2:()->Unit={},modifier: Modifier = Modifier) {
 
     Row (modifier = modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically){
 
-        GlassMorphismIconComponent(size = 50.dp,image=R.drawable.profile, color = Color.White, imgSize = 24.dp, onClick = {})
-        GlassMorphismIconComponent(size = 50.dp,image=R.drawable.bell, color = Color.White, imgSize = 24.dp, onClick = {})
+        GlassMorphismIconComponent(size = 50.dp,image=R.drawable.profile, color = Color.White, imgSize = 24.dp, onClick = {onClick1()})
+        GlassMorphismIconComponent(size = 50.dp,image=R.drawable.bell, color = Color.White, imgSize = 24.dp, onClick = {onClick2()})
     }
 
 }

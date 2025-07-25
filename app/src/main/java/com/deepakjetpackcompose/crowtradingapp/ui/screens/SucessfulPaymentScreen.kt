@@ -48,15 +48,7 @@ fun SuccessfulPaymentScreen(navController: NavController, modifier: Modifier = M
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFFEF6C00).copy(alpha = 0.7f),
-                        Color(0xFF3E2723).copy(alpha = 1f),
-                        Color(0xFF161514)
-                    ),
-                    center = Offset(500f, 0f),
-                    radius = 600f
-                )
+                Color(0xFF161514)
             )
             .padding(horizontal = 20.dp, vertical = 10.dp)
             .statusBarsPadding()
@@ -92,7 +84,7 @@ fun SuccessfulPaymentScreen(navController: NavController, modifier: Modifier = M
         Spacer(Modifier.weight(1f))
 
         Button(onClick = {
-            navController.navigate(NavigationHelper.HomeScreen){
+            navController.navigate(NavigationHelper.AppScreen){
                 popUpTo(NavigationHelper.SuccessfulPaymentScreen){inclusive=true}
             }
         }, modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 15.dp),

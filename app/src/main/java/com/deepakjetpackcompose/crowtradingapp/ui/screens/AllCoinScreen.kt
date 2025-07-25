@@ -1,6 +1,7 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,11 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.domain.navigation.NavigationHelper
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CoinLoader
 import com.deepakjetpackcompose.crowtradingapp.ui.component.CryptoShowComponent
@@ -50,14 +55,17 @@ fun AllCoinScreen(
 
 
     LaunchedEffect(Unit) {
-        coinViewModel.getAllCoins(perPage = 100)
+        if(coinList.isEmpty()) {
+            coinViewModel.getAllCoins(perPage = 40)
+        }
         authViewModel.getUser()
     }
 
     SwipeRefresh(
         state = remember { SwipeRefreshState(isRefreshing) },
         onRefresh = {
-            coinViewModel.getAllCoins(perPage = 100)
+            coinViewModel.getAllCoins(perPage = 40)
+            authViewModel.getUser()
         }
     ) {
 
@@ -84,7 +92,7 @@ fun AllCoinScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 80.dp)
+                    .padding(bottom = 80.dp),
             ) {
 
                 item {
@@ -97,6 +105,34 @@ fun AllCoinScreen(
                     )
                     Spacer(Modifier.height(10.dp))
 
+                }
+
+                item {
+                    if (coinList.isEmpty()) {
+
+                        Box(
+                            modifier = Modifier
+                                .fillParentMaxHeight()
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    painter = painterResource(R.drawable.coin),
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(80.dp)
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    text = "No coins found, please try again",
+                                    color = Color.White
+                                )
+                            }
+                        }
+
+
+                    }
                 }
 
                 items(coinList) { coin ->

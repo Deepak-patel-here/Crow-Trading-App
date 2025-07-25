@@ -92,7 +92,7 @@ fun SuccessfulWithdrawScreen(navController: NavController,modifier: Modifier = M
         Spacer(Modifier.weight(1f))
 
         Button(onClick = {
-            navController.navigate(NavigationHelper.HomeScreen){
+            navController.navigate(NavigationHelper.AppScreen){
                 popUpTo(NavigationHelper.SuccessfulWithdrawScreen){inclusive=true}
             }
         }, modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 15.dp),

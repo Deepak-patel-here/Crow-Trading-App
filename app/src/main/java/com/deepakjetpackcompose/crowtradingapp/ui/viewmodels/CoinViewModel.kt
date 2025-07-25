@@ -1,5 +1,7 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.viewmodels
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -57,6 +59,16 @@ class CoinViewModel @Inject constructor(private val repo: CoinRepository): ViewM
             }
         }
     }
+
+    fun storeImageToCloud(context: Context,
+                          imageUri: Uri,
+                          onUploaded: (String) -> Unit){
+        viewModelScope.launch {
+            repo.uploadImageToCloudinary(context = context,imageUri=imageUri,onUploaded = onUploaded)
+        }
+    }
+
+
 
 
 }

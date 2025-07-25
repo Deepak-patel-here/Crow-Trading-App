@@ -1,6 +1,12 @@
 package com.deepakjetpackcompose.crowtradingapp.ui.screens
 
+import android.R.attr.onClick
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.domain.model.BuyCoinModel
 import com.deepakjetpackcompose.crowtradingapp.domain.model.PieChartModel
@@ -34,19 +44,22 @@ import com.deepakjetpackcompose.crowtradingapp.ui.component.LogoutButton
 import com.deepakjetpackcompose.crowtradingapp.ui.component.PortfolioPieChart
 import com.deepakjetpackcompose.crowtradingapp.ui.component.toPercentage
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
+import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.CoinViewModel
 import kotlin.random.Random
 
 @Composable
 fun ProfileWalletScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
-    authViewmodel: AuthViewModel = hiltViewModel<AuthViewModel>()
+    authViewmodel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    coinViewModel: CoinViewModel = hiltViewModel<CoinViewModel>()
 ) {
 
     val transaction = authViewmodel.transactions.collectAsState()
     val user = authViewmodel.user.collectAsState()
     val boughtCoins = authViewmodel.boughtCoins.collectAsState()
     val loader = authViewmodel.profileLoading.collectAsState()
+    val context= LocalContext.current
 
 
     LaunchedEffect(Unit) {
@@ -61,11 +74,20 @@ fun ProfileWalletScreen(
             .verticalScroll(state = rememberScrollState())
             .padding(16.dp)
     ) {
-        ProfileCard(name = user.value.name, email = user.value.email)
+        ProfileCard(
+            name = user.value.name,
+            email = user.value.email,
+            image = user.value.image.toString(),
+            onClick = {uri->
+                coinViewModel.storeImageToCloud(context=context, imageUri = uri){
+                    authViewmodel.updateProfileImage(it)
+                }
+            }
+        )
         Spacer(Modifier.height(16.dp))
         WalletBalanceSection(balance = user.value.balance?.toDouble() ?: 0.00)
         Spacer(Modifier.height(16.dp))
-        CoinHoldingsCarousel(boughtList = boughtCoins.value)
+        CoinHoldingsCarousel(boughtList = boughtCoins.value, navController = navController, balance = user.value.balance?.toDouble()?:0.00)
         Spacer(Modifier.height(16.dp))
         TransactionHistory(transaction.value)
         Spacer(Modifier.height(16.dp))
@@ -99,7 +121,15 @@ fun ProfileWalletScreen(
 }
 
 @Composable
-fun ProfileCard(name: String, email: String) {
+fun ProfileCard(name: String, email: String, image: String, onClick: (Uri) -> Unit) {
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            if(uri!=null) {
+                onClick(uri)
+            }
+        }
+    )
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(Color.White.copy(alpha = 0.05f)),
@@ -110,13 +140,26 @@ fun ProfileCard(name: String, email: String) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = "https://placehold.co/100x100.png",
-                contentDescription = null,
+            Card(
                 modifier = Modifier
                     .size(60.dp)
                     .clip(CircleShape)
-            )
+                    .clickable(onClick = { imagePicker.launch("image/*") })
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(if (image.isEmpty()) "https://placehold.co/100x100.png" else image)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape),
+                    placeholder = painterResource(R.drawable.profile),
+                    contentScale = ContentScale.Crop
+                )
+
+            }
             Spacer(Modifier.width(16.dp))
             Column {
                 Text(
@@ -164,7 +207,7 @@ fun WalletBalanceSection(balance: Double) {
 }
 
 @Composable
-fun CoinHoldingsCarousel(boughtList: List<BuyCoinModel>) {
+fun CoinHoldingsCarousel(navController: NavController,balance: Double,boughtList: List<BuyCoinModel>) {
     if (boughtList.isEmpty()) {
         Card(
             modifier = Modifier
@@ -190,7 +233,20 @@ fun CoinHoldingsCarousel(boughtList: List<BuyCoinModel>) {
                 Card(
                     modifier = Modifier
                         .width(200.dp)
-                        .height(130.dp),
+                        .height(130.dp)
+                        .clickable(onClick={
+                            navController.navigate(NavigationHelper.TradingScreen(
+                                id = coin.id,
+                                symbol = coin.symbol,
+                                current_price = coin.current_price,
+                                price_change_percentage_24h = coin.price_change_percentage_24h,
+                                image = coin.image,
+                                name = coin.name,
+                                price = coin.price,
+                                price_change_24h = coin.price_change_24h,
+                                balance = balance
+                            ))
+                        }),
                     colors = CardDefaults.cardColors(Color(0xFF1F1F1F)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -203,7 +259,7 @@ fun CoinHoldingsCarousel(boughtList: List<BuyCoinModel>) {
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text=coin.symbol.toString().uppercase(),
+                                text = coin.symbol.toString().uppercase(),
                                 color = Color.White,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -285,10 +341,10 @@ fun PortfolioChart(boughtList: List<BuyCoinModel>) {
     )
     Spacer(Modifier.height(8.dp))
     // Add charting logic with a charting library like MPAndroidChart or Accompanist Canvas here
-    var totalAmount=0.00
+    var totalAmount = 0.00
     val list = boughtList.map {
 
-        totalAmount+=(it.coinCnt?:0)*(it.current_price?:0.00)
+        totalAmount += (it.coinCnt ?: 0) * (it.current_price ?: 0.00)
 
         PieChartModel(
             it.symbol.toString(),
