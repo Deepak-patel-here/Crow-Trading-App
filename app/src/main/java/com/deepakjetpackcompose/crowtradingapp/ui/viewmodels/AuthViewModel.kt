@@ -52,6 +52,9 @@ class AuthViewModel @Inject constructor(
     private val _boughtCoins = MutableStateFlow<List<BuyCoinModel>>(emptyList())
     val boughtCoins = _boughtCoins.asStateFlow()
 
+    private val _profileLoader=MutableStateFlow<Boolean>(false)
+    val profileLoading= _profileLoader.asStateFlow()
+
 
 
 
@@ -305,7 +308,7 @@ class AuthViewModel @Inject constructor(
             }
         }.addOnSuccessListener {
             onResult(true, "Coin bought successfully")
-            addTransaction(boughtModel=buyModel)
+            addTransaction(boughtModel=buyModel, trans = "Buy")
 
             _loading.value = UpdateBalance.Success
 
@@ -361,7 +364,7 @@ class AuthViewModel @Inject constructor(
             }
         }.addOnSuccessListener {
             _loading.value = UpdateBalance.Success
-            addTransaction(boughtModel=boughtModel)
+            addTransaction(boughtModel=boughtModel, trans = "Sell")
             onResult(true, "Transaction successful")
         }.addOnFailureListener { e ->
             onResult(false, e.localizedMessage ?: "Transaction failed")
@@ -403,7 +406,7 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Idle
     }
 
-    fun addTransaction(boughtModel: BuyCoinModel) {
+    fun addTransaction(boughtModel: BuyCoinModel,trans:String) {
         val userId = auth.currentUser?.uid ?: return
 
         val uniqueId = UUID.randomUUID().toString()
@@ -417,7 +420,8 @@ class AuthViewModel @Inject constructor(
             transactionId = uniqueId,
             totalAmount = totalAmount,
             coinCount = boughtModel.coinCnt,
-            date = currentDate
+            date = currentDate,
+            mode = trans
         )
 
         firestore.collection(USER)
@@ -434,6 +438,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun fetchTransactions() {
+
         val userId = auth.currentUser?.uid ?: return
 
         firestore.collection(USER)
@@ -445,6 +450,7 @@ class AuthViewModel @Inject constructor(
                     doc.toObject(Transaction::class.java)
                 }
                 _transactions.value = list
+                Log.d("TransactionFetch", "Transactions fetched successfully: $list")
             }
             .addOnFailureListener { e ->
                 Log.e("TransactionFetch", "Failed to fetch transactions: ${e.localizedMessage}")
@@ -452,6 +458,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun fetchBoughtCoins() {
+        _profileLoader.value=true
         val userId = auth.currentUser?.uid
         if (userId == null) {
             _boughtCoins.value = emptyList()
@@ -465,9 +472,12 @@ class AuthViewModel @Inject constructor(
             .addOnSuccessListener { querySnapshot ->
                 val coins = querySnapshot.documents.mapNotNull { it.toObject(BuyCoinModel::class.java) }
                 _boughtCoins.value = coins
+                _profileLoader.value=false
+
             }
             .addOnFailureListener {
                 _boughtCoins.value = emptyList()
+                _profileLoader.value=false
             }
     }
 

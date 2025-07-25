@@ -16,6 +16,7 @@ import com.deepakjetpackcompose.crowtradingapp.ui.screens.HomeScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.LoginScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.OnBoardingScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.PaymentScreen
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.ProfileWalletScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.SignUpScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.SuccessfulPaymentScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.SuccessfulWithdrawScreen
@@ -71,6 +72,8 @@ fun NavApp(modifier: Modifier = Modifier) {
                 WithdrawScreen(balance = data.balance, navController = navController)
             }
             composable<NavigationHelper.SuccessfulWithdrawScreen> { SuccessfulWithdrawScreen(navController = navController) }
+
+            composable <NavigationHelper.ProfileWalletScreen>{ ProfileWalletScreen(navController = navController) }
         }
     }
 }

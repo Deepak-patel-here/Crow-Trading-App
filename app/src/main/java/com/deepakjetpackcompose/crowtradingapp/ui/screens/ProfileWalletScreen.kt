@@ -2,6 +2,7 @@ package com.deepakjetpackcompose.crowtradingapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -25,12 +26,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.Navigator
 import coil3.compose.AsyncImage
 import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.domain.model.BuyCoinModel
+import com.deepakjetpackcompose.crowtradingapp.domain.model.PieChartModel
 import com.deepakjetpackcompose.crowtradingapp.domain.model.Transaction
+import com.deepakjetpackcompose.crowtradingapp.domain.navigation.NavigationHelper
+import com.deepakjetpackcompose.crowtradingapp.ui.component.CoinLoader
+import com.deepakjetpackcompose.crowtradingapp.ui.component.LogoutButton
+import com.deepakjetpackcompose.crowtradingapp.ui.component.PortfolioPieChart
 import com.deepakjetpackcompose.crowtradingapp.ui.component.toPercentage
 import com.deepakjetpackcompose.crowtradingapp.ui.viewmodels.AuthViewModel
+import kotlin.random.Random
 
 @Composable
 fun ProfileWalletScreen(
@@ -39,14 +47,16 @@ fun ProfileWalletScreen(
     authViewmodel: AuthViewModel = hiltViewModel<AuthViewModel>()
 ) {
 
-    val transaction=authViewmodel.transactions.collectAsState()
-    val user=authViewmodel.user.collectAsState()
+    val transaction = authViewmodel.transactions.collectAsState()
+    val user = authViewmodel.user.collectAsState()
     val boughtCoins = authViewmodel.boughtCoins.collectAsState()
+    val loader = authViewmodel.profileLoading.collectAsState()
 
 
     LaunchedEffect(Unit) {
         authViewmodel.getUser()
         authViewmodel.fetchBoughtCoins()
+        authViewmodel.fetchTransactions()
     }
     Column(
         modifier = modifier
@@ -55,15 +65,15 @@ fun ProfileWalletScreen(
             .verticalScroll(state = rememberScrollState())
             .padding(16.dp)
     ) {
-        ProfileCard(name=user.value.name,email=user.value.email)
+        ProfileCard(name = user.value.name, email = user.value.email)
         Spacer(Modifier.height(16.dp))
-        WalletBalanceSection(balance = user.value.balance?.toDouble()?:0.00)
+        WalletBalanceSection(balance = user.value.balance?.toDouble() ?: 0.00)
         Spacer(Modifier.height(16.dp))
         CoinHoldingsCarousel(boughtList = boughtCoins.value)
         Spacer(Modifier.height(16.dp))
         TransactionHistory(transaction.value)
         Spacer(Modifier.height(16.dp))
-        PortfolioChart()
+        PortfolioChart(boughtList = boughtCoins.value)
         Spacer(Modifier.height(16.dp))
         AchievementsSection()
         Spacer(Modifier.height(16.dp))
@@ -75,12 +85,27 @@ fun ProfileWalletScreen(
         Spacer(Modifier.height(16.dp))
         DarkModeToggle()
         Spacer(Modifier.height(8.dp))
-        LogoutButton(onClick = { authViewmodel.signOut() })
+        LogoutButton(onClick = {
+            authViewmodel.signOut()
+            navController.navigate(NavigationHelper.LoginScreen) {
+                popUpTo(NavigationHelper.ProfileWalletScreen) { inclusive = true }
+            }
+        })
+    }
+    if (loader.value) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.6f)), // semi-transparent overlay
+            contentAlignment = Alignment.Center
+        ) {
+            CoinLoader(size = 300.dp)
+        }
     }
 }
 
 @Composable
-fun ProfileCard(name:String,email:String) {
+fun ProfileCard(name: String, email: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(Color.White.copy(alpha = 0.05f)),
@@ -114,7 +139,7 @@ fun ProfileCard(name:String,email:String) {
 
 @Composable
 fun WalletBalanceSection(balance: Double) {
-    val ruppe=balance*86.9
+    val ruppe = balance * 86.9
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(Color.Transparent),
@@ -146,29 +171,63 @@ fun WalletBalanceSection(balance: Double) {
 
 @Composable
 fun CoinHoldingsCarousel(boughtList: List<BuyCoinModel>) {
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        items(boughtList) {coin->
-            Card(
+    if (boughtList.isEmpty()) {
+        Card(
+            modifier = Modifier
+                .width(200.dp)
+                .height(130.dp),
+            colors = CardDefaults.cardColors(Color(0xFF1F1F1F)),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
                 modifier = Modifier
-                    .width(200.dp)
-                    .height(130.dp),
-                colors = CardDefaults.cardColors(Color(0xFF1F1F1F)),
-                shape = RoundedCornerShape(12.dp)
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        AsyncImage(
-                            model = coin.image,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                Text("No coins bought yet", color = Color.White)
+            }
+        }
+    } else {
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(boughtList) { coin ->
+                Card(
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(130.dp),
+                    colors = CardDefaults.cardColors(Color(0xFF1F1F1F)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AsyncImage(
+                                model = coin.image,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "${coin.symbol.toString().toUpperCase()}",
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Text("${coin.coinCnt}", color = Color.White)
+                        Text(
+                            "${coin.current_price}",
+                            color = Color.Green,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(Modifier.width(8.dp))
-                        Text("${coin.symbol.toString().toUpperCase()}", color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            toPercentage(
+                                value = coin.price_change_percentage_24h ?: 0.00,
+                                total = 100.0
+                            ), color = Color.Green, fontSize = 12.sp
+                        )
                     }
-                    Spacer(Modifier.height(8.dp))
-                    Text("${coin.coinCnt}", color = Color.White)
-                    Text("${coin.current_price}", color = Color.Green, fontWeight = FontWeight.Bold)
-                    Text(toPercentage(value = coin.price_change_percentage_24h?:0.00, total = 100.0), color = Color.Green, fontSize = 12.sp)
                 }
             }
         }
@@ -185,23 +244,37 @@ fun TransactionHistory(list: List<Transaction>) {
             fontWeight = FontWeight.SemiBold
         )
         Spacer(Modifier.height(8.dp))
-        LazyColumn(modifier = Modifier.height(200.dp)) {
-            items(list) {coin->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Share, contentDescription = null, tint = Color.Green)
-                        Spacer(Modifier.width(8.dp))
-                        Column {
-                            Text("Buy ${coin.symbol}", color = Color.White)
-                            Text("${coin.coinCount}  ${coin.symbol} at $${coin.totalAmount}", fontSize = 12.sp, color = Color.LightGray)
+
+        if (list.isEmpty()) {
+            Text("No transactions yet", color = Color.LightGray)
+        } else {
+            LazyColumn(modifier = Modifier.height(200.dp)) {
+                items(list) { coin ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(R.drawable.transaction),
+                                contentDescription = null,
+                                tint = Color.Green,
+                                modifier = Modifier.size(25.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Column {
+                                Text("${coin.mode} ${coin.symbol}", color = Color.White)
+                                Text(
+                                    "${coin.coinCount}  ${coin.symbol} at $${coin.totalAmount}",
+                                    fontSize = 12.sp,
+                                    color = Color.LightGray
+                                )
+                            }
                         }
+                        Text("${coin.date}", color = Color.Gray, fontSize = 12.sp)
                     }
-                    Text("${coin.date}", color = Color.Gray, fontSize = 12.sp)
                 }
             }
         }
@@ -209,7 +282,7 @@ fun TransactionHistory(list: List<Transaction>) {
 }
 
 @Composable
-fun PortfolioChart() {
+fun PortfolioChart(boughtList: List<BuyCoinModel>) {
     Text(
         "Portfolio Allocation",
         color = Color.White,
@@ -218,6 +291,20 @@ fun PortfolioChart() {
     )
     Spacer(Modifier.height(8.dp))
     // Add charting logic with a charting library like MPAndroidChart or Accompanist Canvas here
+    var totalAmount=0.00
+    val list = boughtList.map {
+
+        totalAmount+=(it.coinCnt?:0)*(it.current_price?:0.00)
+
+        PieChartModel(
+            it.symbol.toString(),
+            it.price_change_percentage_24h?.toFloat() ?: 0.0f,
+            color = getRandomColor()
+        )
+
+    }
+
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,7 +312,7 @@ fun PortfolioChart() {
             .background(Color.DarkGray.copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp)),
         contentAlignment = Alignment.Center
     ) {
-        Text("[Pie Chart Here]", color = Color.White.copy(alpha = 0.5f))
+        PortfolioPieChart(coins = list, totalAmount = totalAmount.toString())
     }
 }
 
@@ -351,13 +438,12 @@ fun DarkModeToggle() {
     }
 }
 
-@Composable
-fun LogoutButton(onClick: () -> Unit) {
-    Button(
-        onClick = { onClick() },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE11A38))
-    ) {
-        Text("Logout", color = Color.White)
-    }
+fun getRandomColor(): Color {
+    val random = Random(System.currentTimeMillis())
+    val red = random.nextInt(100, 256) // avoid very dark colors
+    val green = random.nextInt(100, 256)
+    val blue = random.nextInt(100, 256)
+    return Color(red, green, blue)
 }
+
+

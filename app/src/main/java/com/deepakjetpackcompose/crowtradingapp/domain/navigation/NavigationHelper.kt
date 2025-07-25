@@ -45,4 +45,7 @@ sealed class NavigationHelper {
     @Serializable
     object SuccessfulWithdrawScreen: NavigationHelper()
 
+    @Serializable
+    object ProfileWalletScreen: NavigationHelper()
+
 }

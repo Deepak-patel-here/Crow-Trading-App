@@ -7,5 +7,6 @@ data class Transaction(
     val id:String?="",
     val totalAmount:Double?=0.00,
     val coinCount:Int?=0,
-    val date:String?=""
+    val date:String?="",
+    val mode:String?=""
 )
