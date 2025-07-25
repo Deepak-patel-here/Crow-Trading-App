@@ -75,8 +75,6 @@ fun ProfileWalletScreen(
         Spacer(Modifier.height(16.dp))
         PortfolioChart(boughtList = boughtCoins.value)
         Spacer(Modifier.height(16.dp))
-        AchievementsSection()
-        Spacer(Modifier.height(16.dp))
         SecuritySettingsCard()
         Spacer(Modifier.height(16.dp))
         QuickActionsRow()
