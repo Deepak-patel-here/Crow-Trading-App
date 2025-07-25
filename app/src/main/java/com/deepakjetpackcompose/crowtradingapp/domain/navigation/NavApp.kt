@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.deepakjetpackcompose.crowtradingapp.ui.screens.AllCoinScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.AppScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.HomeScreen
 import com.deepakjetpackcompose.crowtradingapp.ui.screens.LoginScreen
@@ -51,29 +52,39 @@ fun NavApp(modifier: Modifier = Modifier) {
                 val data = it.toRoute<NavigationHelper.TradingScreen>()
                 val id = data.id
                 TradingScreen(
-                    id=id?:"",
-                    symbol = data.symbol?:"",
-                    name=data.name?:"",
-                    balance = data.balance?:0.0,
-                    currentPrice = data.current_price?:0.0,
-                    percentage = data.price_change_percentage_24h?:0.0,
-                    image = data.image?:"",
-                    price = data.price?:emptyList(),
-                    price_change_24h = data.price_change_24h?:0.0,
+                    id = id ?: "",
+                    symbol = data.symbol ?: "",
+                    name = data.name ?: "",
+                    balance = data.balance ?: 0.0,
+                    currentPrice = data.current_price ?: 0.0,
+                    percentage = data.price_change_percentage_24h ?: 0.0,
+                    image = data.image ?: "",
+                    price = data.price ?: emptyList(),
+                    price_change_24h = data.price_change_24h ?: 0.0,
                     navController = navController
                 )
             }
 
             composable<NavigationHelper.PaymentScreen> { PaymentScreen(navController = navController) }
-            composable<NavigationHelper.SuccessfulPaymentScreen> { SuccessfulPaymentScreen(navController = navController) }
+            composable<NavigationHelper.SuccessfulPaymentScreen> {
+                SuccessfulPaymentScreen(
+                    navController = navController
+                )
+            }
 
             composable<NavigationHelper.WithdrawScreen> {
-                val data=it.toRoute<NavigationHelper.WithdrawScreen>()
+                val data = it.toRoute<NavigationHelper.WithdrawScreen>()
                 WithdrawScreen(balance = data.balance, navController = navController)
             }
-            composable<NavigationHelper.SuccessfulWithdrawScreen> { SuccessfulWithdrawScreen(navController = navController) }
+            composable<NavigationHelper.SuccessfulWithdrawScreen> {
+                SuccessfulWithdrawScreen(
+                    navController = navController
+                )
+            }
 
-            composable <NavigationHelper.ProfileWalletScreen>{ ProfileWalletScreen(navController = navController) }
+            composable<NavigationHelper.ProfileWalletScreen> { ProfileWalletScreen(navController = navController) }
+
+            composable<NavigationHelper.AllCoinScreen> { AllCoinScreen(navController = navController) }
         }
     }
 }

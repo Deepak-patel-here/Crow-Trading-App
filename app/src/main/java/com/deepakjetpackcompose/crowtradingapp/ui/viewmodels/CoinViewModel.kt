@@ -27,11 +27,11 @@ class CoinViewModel @Inject constructor(private val repo: CoinRepository): ViewM
 
 
 
-    fun getAllCoins(){
+    fun getAllCoins( perPage: Int = 20){
         _coinList.value=CoinList(loading = true)
         viewModelScope.launch (Dispatchers.IO){
             try {
-                val response=repo.getAllCoins()
+                val response=repo.getAllCoins(perpage = perPage)
                 _coinList.value= CoinList(loading = false, listOfCoins = response)
                 Log.d("api",response[0].toString())
             }catch(e: Exception){

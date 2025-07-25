@@ -12,12 +12,12 @@ import javax.inject.Inject
 
 class CoinRepository @Inject constructor(private val apiClient: HttpClient)  {
 
-    suspend fun getAllCoins(): List<CryptoModelItem> {
+    suspend fun getAllCoins( perpage: Int = 20,): List<CryptoModelItem> {
         try {
             val response = apiClient.get(BASE_URL) {
                 parameter("vs_currency", "usd")
                 parameter("order", "market_cap_desc")
-                parameter("per_page", 20)
+                parameter("per_page", perpage)
                 parameter("page", 1)
                 parameter("sparkline", true)
             }.body<List<CryptoModelItem>>()

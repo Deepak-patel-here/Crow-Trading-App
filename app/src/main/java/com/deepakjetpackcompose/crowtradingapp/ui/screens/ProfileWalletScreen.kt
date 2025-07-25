@@ -10,8 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,12 +19,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.Navigator
 import coil3.compose.AsyncImage
 import com.deepakjetpackcompose.crowtradingapp.R
 import com.deepakjetpackcompose.crowtradingapp.domain.model.BuyCoinModel
@@ -137,7 +133,7 @@ fun ProfileCard(name: String, email: String) {
 
 @Composable
 fun WalletBalanceSection(balance: Double) {
-    val ruppe = balance * 86.9
+    val rupees = balance * 86.9
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(Color.Transparent),
@@ -161,7 +157,7 @@ fun WalletBalanceSection(balance: Double) {
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                Text("₹$ruppe", fontSize = 16.sp, color = Color.White.copy(alpha = 0.9f))
+                Text("₹$rupees", fontSize = 16.sp, color = Color.White.copy(alpha = 0.9f))
             }
         }
     }
@@ -207,7 +203,7 @@ fun CoinHoldingsCarousel(boughtList: List<BuyCoinModel>) {
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "${coin.symbol.toString().toUpperCase()}",
+                                text=coin.symbol.toString().uppercase(),
                                 color = Color.White,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -310,28 +306,10 @@ fun PortfolioChart(boughtList: List<BuyCoinModel>) {
             .background(Color.DarkGray.copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp)),
         contentAlignment = Alignment.Center
     ) {
-        PortfolioPieChart(coins = list, totalAmount = totalAmount.toString())
+        PortfolioPieChart(data = list)
     }
 }
 
-@Composable
-fun AchievementsSection() {
-    Text("Achievements", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-    Spacer(Modifier.height(8.dp))
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        items(3) {
-            Card(
-                modifier = Modifier.size(120.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(Color(0xFF222222))
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text("🏅 1K Traded", color = Color.White, textAlign = TextAlign.Center)
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun SecuritySettingsCard() {
@@ -437,7 +415,7 @@ fun DarkModeToggle() {
 }
 
 fun getRandomColor(): Color {
-    val random = Random(System.currentTimeMillis())
+    val random = Random(System.nanoTime())
     val red = random.nextInt(100, 256) // avoid very dark colors
     val green = random.nextInt(100, 256)
     val blue = random.nextInt(100, 256)

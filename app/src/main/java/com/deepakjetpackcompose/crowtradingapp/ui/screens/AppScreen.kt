@@ -33,6 +33,7 @@ fun AppScreen(navControl: NavController,modifier: Modifier = Modifier) {
 
         when(isSelected.value){
             1-> HomeScreen(navController = navControl, modifier = Modifier.padding(innerPadding))
+            2->AllCoinScreen(navController = navControl,modifier = Modifier.padding(innerPadding))
             3->FavoriteCoinScreen(navController = navControl, modifier = Modifier.padding(innerPadding))
             4-> ProfileWalletScreen(navController = navControl, modifier = Modifier.padding(innerPadding))
         }

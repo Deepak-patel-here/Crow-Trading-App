@@ -48,4 +48,7 @@ sealed class NavigationHelper {
     @Serializable
     object ProfileWalletScreen: NavigationHelper()
 
+    @Serializable
+    object AllCoinScreen: NavigationHelper()
+
 }
